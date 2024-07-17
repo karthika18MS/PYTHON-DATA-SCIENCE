@@ -1,0 +1,68 @@
+import streamlit as st
+import numpy as np
+from PIL import Image
+from PIL import ImageOps
+import keras
+from keras.models import load_model
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS']='0'
+model=load_model('flower_model.h5')
+classes=['rose','tulip','sunflower','dandelion','daisy']
+def predict(image):
+    img=Image.open(image)
+    img=img.resize((150,150))
+
+    img_array=np.array(img)/255.0
+    img_array=np.expand_dims(img_array,axis=0)
+    prediction=model.predict(img_array)
+    predicted_class=np.argmax(prediction)
+    confidence=prediction[0][predicted_class]
+    return classes[predicted_class],confidence
+st.title(":rainbow[FLOWERS RECOGNITION USING CNN]")
+img=Image.open('flower3.png')
+st.image(img,width=500)
+on=st.toggle("About")
+if on:
+    st.write("Here we identifying different classes using Convolutional Neural Network")
+    st.title(':blue[Goal]')
+    st.write("This project aims to develop a model for identifying five different flower species (rose, tulip, sunflower, dandelion, daisy) using Convolutional Neural Networks (CNNs)")
+    st.title(':red[Describe]')
+    st.write("The dataset consists of 4322 images collected from various online sources.The model achieved an accuracy of 94% on the test set")
+    st.markdown("Classes used here :")
+    st.write("Rose")
+    st.write("Tulip")
+    st.write("Sunflower")
+    st.write("Dandelion")
+    st.write("Daisy")
+tab1,tab2,tab3,tab4,tab5=st.tabs(['ROSE','TULIP','SUNFLOWER','DANDELION','DAISY'])
+with tab1:
+    st.header('ROSE')
+    st.image("rose.jpg", width=200)
+with tab2:
+    st.header("TULIP")
+    st.image("TULIP.jpg", width=200)
+with tab3:
+    st.header("SUNFLOWER")
+    st.image("SUNFLOWER.jpg", width=200)
+
+with tab4:
+    st.tabs('DANDELION')
+    st.image("dandelion.jpg",width=200)
+with tab5:
+    st.tabs('DAISY')
+    st.image("daisy.jpg",width=200)
+
+
+st.title(":green[Link to the Resources]")
+st.write("[Google colab](https://colab.research.google.com/drive/1xCT-pKJeXkfH2y8-I1BUpemFNn8SBeG9?usp=sharing)")
+st.write("[Kaggle Dataset](https://www.kaggle.com/datasets/alxmamaev/flowers-recognition/data)")
+st.title(":grey[IMAGE CLASSIFIER]")
+uploaded_file=st.file_uploader("Choose an image.......",type=['png','jpg','jpeg','jfif'])
+if uploaded_file is not None:
+    image=Image.open(uploaded_file)
+    st.image(image,caption='Uploaded Image',use_column_width=True)
+    st.write("")
+    st.write("Classifying.......")
+    class_name,confidence=predict(uploaded_file)
+
+    st.write(f"Prediction: {class_name},Confidence:{confidence:.2f}")
