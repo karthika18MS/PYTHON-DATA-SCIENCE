@@ -1,0 +1,56 @@
+import streamlit as st
+import numpy as np
+from PIL import Image
+
+import keras
+from keras.models import load_model
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS']='0'
+model=load_model('PCOS.h5')
+classes=['notinfected','infected']
+def predict(image):
+    img=Image.open(image)
+    img=img.resize((150,150))
+
+    img_array=np.array(img)/255.0
+    img_array=np.expand_dims(img_array,axis=0)
+    prediction=model.predict(img_array)
+    predicted_class=np.argmax(prediction)
+    #confidence=prediction[0][predicted_class]
+    return classes[predicted_class]#,confidence
+st.title(":grey[PCOS DETECTION USING ULTRASOUND IMAGES]")
+img=Image.open('pcos3.jfif')
+st.image(img,width=500)
+on=st.toggle("About")
+if on:
+    st.write("Here we identifying different classes using Convolutional Neural Network")
+
+    st.title(':red[Describe]')
+    st.write("Data folder consist of 'train' and 'test' subfolders containing 2 categories of data 'infected' and 'notinfected'")
+    st.markdown(':red[Infected]')
+    st.write("Infected : Images of ovaries having PCOS")
+    st.markdown(':green[ Not Infected]')
+    st.write("Not infected : Images of healthy ovaries")
+
+tab1,tab2=st.tabs(['INFECTED','NOT_INFECTED'])
+with tab1:
+    st.header('INFECTED')
+    st.image("INFECTED.jpg", width=200)
+with tab2:
+    st.header("NOT INFECTED")
+    st.image("NOT_INFECTED.jpg", width=200)
+
+st.title(":green[Link to the Resources]")
+st.write("[Google colab](https://colab.research.google.com/drive/1vcP4tb5E6cJdC12zEuiu3HeEKWiP5TAt?usp=sharing)")
+st.write("[Kaggle Dataset](https://www.kaggle.com/datasets/anaghachoudhari/pcos-detection-using-ultrasound-images)")
+st.title(":grey[IMAGE CLASSIFIER]")
+uploaded_file=st.file_uploader("Choose an image.......",type=['png','jpg','jpeg','jfif'])
+if uploaded_file is not None:
+    image=Image.open(uploaded_file)
+    st.image(image,caption='Uploaded Image',use_column_width=True)
+    onn=st.toggle('Active Prediction')
+    if onn:
+        st.write("")
+        st.write("Prediction Activated")
+        class_name= predict(uploaded_file)
+        st.write(f"Prediction:{class_name}")
